@@ -1,0 +1,7 @@
+{
+  "upstream_repository": "https://github.com/op7418/Humanizer-zh",
+  "upstream_branch": "main",
+  "skill_name": "humanizer-zh",
+  "sync_policy": "pull-request",
+  "conversion_policy": "deterministic-no-llm"
+}

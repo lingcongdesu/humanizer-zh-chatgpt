@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Validate deterministic conversion
+        run: python scripts/validate_conversion.py --source-dir upstream-snapshot --output-dir generated/humanizer-zh
+      - name: Build uploadable Skill
+        run: python scripts/package_release.py
+      - name: Inspect archive
+        run: |
+          python - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('dist/skill.zip') as zf:
+              names = zf.namelist()
+          assert 'humanizer-zh/SKILL.md' in names
+          assert 'humanizer-zh/agents/openai.yaml' in names
+          print('\n'.join(names))
+          PY

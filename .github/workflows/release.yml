@@ -1,0 +1,47 @@
+name: Release ChatGPT Skill
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "generated/humanizer-zh/**"
+      - "UPSTREAM.lock"
+      - "scripts/package_release.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate
+        run: |
+          python -m unittest discover -s tests -v
+          python scripts/validate_conversion.py --source-dir upstream-snapshot --output-dir generated/humanizer-zh
+      - name: Build skill.zip
+        run: python scripts/package_release.py
+      - id: upstream
+        name: Release metadata
+        shell: bash
+        run: |
+          SHA=$(python -c 'import json; print(json.load(open("UPSTREAM.lock"))["commit"])')
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "short=${SHA:0:7}" >> "$GITHUB_OUTPUT"
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: humanizer-zh-${{ steps.upstream.outputs.short }}-chatgpt
+          name: Humanizer-zh ChatGPT ${{ steps.upstream.outputs.short }}
+          body: |
+            ChatGPT-compatible build of `op7418/Humanizer-zh`.
+
+            Upstream commit: `${{ steps.upstream.outputs.sha }}`
+
+            Upload `skill.zip` in ChatGPT Skills. The ChatGPT UI currently remains a manual upload step; this repository automates upstream tracking, conversion, validation and packaging.
+          files: dist/skill.zip

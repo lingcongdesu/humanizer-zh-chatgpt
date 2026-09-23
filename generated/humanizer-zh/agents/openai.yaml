@@ -1,0 +1,4 @@
+interface:
+  display_name: "Humanizer 中文润色"
+  short_description: "在保留事实、确定程度和作者声音的前提下，让中文表达更自然。"
+  default_prompt: "使用 $humanizer-zh 润色我提供的中文文本；优先保留事实、限定、归因和原有文体，只修改确实存在的表达问题。"

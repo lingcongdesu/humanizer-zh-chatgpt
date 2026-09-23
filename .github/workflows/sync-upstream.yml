@@ -1,0 +1,48 @@
+name: Sync upstream Humanizer-zh
+
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch and convert upstream
+        run: python scripts/sync_upstream.py
+      - name: Validate conversion
+        run: python scripts/validate_conversion.py --source-dir upstream-snapshot --output-dir generated/humanizer-zh
+      - name: Run adapter tests
+        run: python -m unittest discover -s tests -v
+      - id: upstream
+        name: Read upstream commit
+        shell: bash
+        run: |
+          SHA=$(python -c 'import json; print(json.load(open("UPSTREAM.lock"))["commit"])')
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "short=${SHA:0:7}" >> "$GITHUB_OUTPUT"
+      - name: Create review PR when upstream changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/sync-humanizer-zh
+          delete-branch: true
+          commit-message: "chore: sync Humanizer-zh ${{ steps.upstream.outputs.short }}"
+          title: "chore: sync Humanizer-zh to ${{ steps.upstream.outputs.short }}"
+          body: |
+            Automated upstream sync from `op7418/Humanizer-zh`.
+
+            - Upstream commit: `${{ steps.upstream.outputs.sha }}`
+            - Conversion: deterministic; no LLM rewriting
+            - CI checks frontmatter, payload preservation, provenance and archive layout
+
+            Review the upstream rule changes before merging. Merging to `main` triggers a new `skill.zip` release.

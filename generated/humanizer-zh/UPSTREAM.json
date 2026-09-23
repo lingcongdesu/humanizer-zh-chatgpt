@@ -1,0 +1,7 @@
+{
+  "upstream_repository": "https://github.com/op7418/Humanizer-zh",
+  "upstream_commit": "f4518a8eab97b8bfebc66a89d34320a89bef6930",
+  "conversion": "deterministic",
+  "source_file": "SKILL.md",
+  "split_heading": "## 模式的使用方式"
+}
