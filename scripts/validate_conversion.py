@@ -8,7 +8,7 @@ import json
 import re
 from pathlib import Path
 
-from convert_skill import SPLIT_HEADING, build_core, parse_frontmatter
+from convert_skill import ADAPTER_DESCRIPTION, OPENAI_METADATA, SPLIT_HEADING, build_core, parse_frontmatter
 
 PREFIX = (
     "# Humanizer-zh 详细编辑模式\n\n"
@@ -62,10 +62,17 @@ def main() -> int:
     checks: dict[str, bool] = {}
     checks["frontmatter_only_name_description"] = output_frontmatter_keys(generated) == {"name", "description"}
     checks["name_preserved"] = generated_meta["name"] == source_meta["name"] == "humanizer-zh"
-    checks["description_preserved"] = generated_meta["description"] == source_meta["description"]
+    checks["description_adapter_owned"] = generated_meta["description"] == ADAPTER_DESCRIPTION
+    checks["description_chinese_only"] = (
+        "Chinese-language" in generated_meta["description"]
+        and "only" in generated_meta["description"]
+        and "纯英文" in generated_meta["description"]
+    )
     checks["core_preserved"] = generated_body == source_core.rstrip() + NAV
     checks["patterns_preserved"] = patterns_doc == PREFIX + source_patterns.rstrip() + "\n"
-    checks["openai_metadata_present"] = (args.output_dir / "agents" / "openai.yaml").is_file()
+    checks["openai_metadata_chinese_only"] = (
+        (args.output_dir / "agents" / "openai.yaml").read_text(encoding="utf-8") == OPENAI_METADATA
+    )
     checks["license_present"] = (args.output_dir / "LICENSE").is_file()
     checks["no_placeholder_files"] = not any(
         p.name.startswith("example_") or p.name == "api_reference.md"

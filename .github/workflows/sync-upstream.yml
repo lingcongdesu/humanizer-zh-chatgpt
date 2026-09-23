@@ -2,7 +2,7 @@ name: Sync upstream Humanizer-zh
 
 on:
   schedule:
-    - cron: "23 3 * * *"
+    - cron: "0 0 1 * *"
   workflow_dispatch:
 
 permissions:

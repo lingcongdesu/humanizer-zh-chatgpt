@@ -1,6 +1,6 @@
 ---
 name: humanizer-zh
-description: "编辑中文文章、评论和文档中的空话、重复及模板化表达，让文字更自然，同时保留事实、确定程度和作者声音。适用于润色已有文本，不用于判断作者身份或保证通过 AI 检测器。"
+description: "Chinese-language prose and document editing only: 润色与审阅已有中文文章、评论、说明和文档，减少空话、重复与模板化表达，同时保留事实、确定程度和作者声音。不用于纯英文 prose 的常规润色；英文写作使用 humanizer-en。"
 ---
 
 # Humanizer-zh

@@ -33,15 +33,17 @@ jobs:
           SHA=$(python -c 'import json; print(json.load(open("UPSTREAM.lock"))["commit"])')
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "short=${SHA:0:7}" >> "$GITHUB_OUTPUT"
+          echo "adapter=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: humanizer-zh-${{ steps.upstream.outputs.short }}-chatgpt
-          name: Humanizer-zh ChatGPT ${{ steps.upstream.outputs.short }}
+          tag_name: humanizer-zh-${{ steps.upstream.outputs.short }}-chatgpt-${{ steps.upstream.outputs.adapter }}
+          name: Humanizer-zh ChatGPT ${{ steps.upstream.outputs.short }} (adapter ${{ steps.upstream.outputs.adapter }})
           body: |
             ChatGPT-compatible build of `op7418/Humanizer-zh`.
 
             Upstream commit: `${{ steps.upstream.outputs.sha }}`
+            Adapter commit: `${{ github.sha }}`
 
             Upload `skill.zip` in ChatGPT Skills. The ChatGPT UI currently remains a manual upload step; this repository automates upstream tracking, conversion, validation and packaging.
           files: dist/skill.zip

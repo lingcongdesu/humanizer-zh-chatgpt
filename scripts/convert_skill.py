@@ -11,6 +11,17 @@ from pathlib import Path
 
 SPLIT_HEADING = "## 模式的使用方式"
 SOURCE_REPO = "https://github.com/op7418/Humanizer-zh"
+ADAPTER_DESCRIPTION = (
+    "Chinese-language prose and document editing only: 润色与审阅已有中文文章、评论、说明和文档，"
+    "减少空话、重复与模板化表达，同时保留事实、确定程度和作者声音。"
+    "不用于纯英文 prose 的常规润色；英文写作使用 humanizer-en。"
+)
+OPENAI_METADATA = (
+    "interface:\n"
+    '  display_name: "中文 Humanizer"\n'
+    '  short_description: "仅用于中文文章、评论、说明和文档的润色与审阅。"\n'
+    '  default_prompt: "使用 $humanizer-zh 润色我提供的中文文本；优先保留事实、限定、归因和原有文体，只修改确实存在的表达问题。"\n'
+)
 
 
 def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
@@ -109,7 +120,7 @@ def convert(source_dir: Path, output_dir: Path, upstream_sha: str) -> None:
     generated_skill = (
         "---\n"
         f"name: {meta['name']}\n"
-        f"description: {yaml_scalar(meta['description'])}\n"
+        f"description: {yaml_scalar(ADAPTER_DESCRIPTION)}\n"
         "---\n"
         + core.rstrip()
         + "\n\n"
@@ -123,13 +134,7 @@ def convert(source_dir: Path, output_dir: Path, upstream_sha: str) -> None:
     (output_dir / "references" / "patterns.md").write_text(
         patterns_document(patterns), encoding="utf-8"
     )
-    (output_dir / "agents" / "openai.yaml").write_text(
-        "interface:\n"
-        '  display_name: "Humanizer 中文润色"\n'
-        '  short_description: "在保留事实、确定程度和作者声音的前提下，让中文表达更自然。"\n'
-        '  default_prompt: "使用 $humanizer-zh 润色我提供的中文文本；优先保留事实、限定、归因和原有文体，只修改确实存在的表达问题。"\n',
-        encoding="utf-8",
-    )
+    (output_dir / "agents" / "openai.yaml").write_text(OPENAI_METADATA, encoding="utf-8")
     provenance = {
         "upstream_repository": SOURCE_REPO,
         "upstream_commit": upstream_sha,
